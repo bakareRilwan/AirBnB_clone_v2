@@ -34,10 +34,15 @@ class HBNBCommand(cmd.Cmd):
         """create: Creates a new instance of BaseModel, saves it
         (to the JSON file)and prints the id"""
         arg = line.split()
-
+        tmp = line.split()
+        tmp.pop(0)
+        dic = {}
+        for ele in tmp:
+            key_val = ele.split('=')
+            dic[key_val[0]] = key_val[1]
         if len(arg) == 0:
             print("** class name missing **")
-        elif len(arg) == 1:
+        elif len(arg) > 0:
             if arg[0] not in self.class_names:
                 print("** class doesn't exist **")
             else:
@@ -55,6 +60,8 @@ class HBNBCommand(cmd.Cmd):
                     new = Amenity()
                 elif arg[0] == 'Review':
                     new = Review()
+                for i, j in dic.items():
+                    setattr(new, i, j)
                 new.save()
                 print(new.id)
 
