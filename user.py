@@ -23,7 +23,7 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def do_create(self, args):
-        """create: Creates a new instance of BaseModel, saves it
+        """Creates a new instance of BaseModel, saves it
         (to the JSON file)and prints the id"""
         arg = args.split()
         print(arg)
