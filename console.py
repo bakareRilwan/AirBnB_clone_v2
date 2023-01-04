@@ -11,6 +11,8 @@ from models.city import City
 from models.place import Place
 from models.amenity import Amenity
 from models.review import Review
+import re
+from shlex import split
 
 
 class HBNBCommand(cmd.Cmd):
@@ -34,13 +36,7 @@ class HBNBCommand(cmd.Cmd):
         """create: Creates a new instance of BaseModel, saves it
         (to the JSON file)and prints the id"""
         arg = line.split()
-        tmp = line.split()
-        tmp.pop(0)
-        dic = {}
-        for ele in tmp:
-            key_val = ele.split('=')
-            val = key_val[1].strip('\"')
-            dic[key_val[0]] = val
+        tmp = line.split(" ")
         if len(arg) == 0:
             print("** class name missing **")
         elif len(arg) > 0:
@@ -61,8 +57,31 @@ class HBNBCommand(cmd.Cmd):
                     new = Amenity()
                 elif arg[0] == 'Review':
                     new = Review()
-                for i, j in dic.items():
-                    setattr(new, i.strip('\"'), j)
+
+                #Search for unwanted chrac and strip
+                for i in range(1, len(tmp)):
+                    rex = r'^(\S+)\=(\S+)'
+                    match = re.search(rex, tmp[i])
+                    if not match:
+                        continue
+                    key = match.group(1)
+                    value = match.group(2)
+                    cast = None
+                    if not re.search('^".*"$', value):
+                        if '.' in value:
+                            cast = float
+                        else:
+                            cast = int
+
+                    else:
+                        value = value.replace('"', '')
+                        value = value.replace('_', ' ')
+                    if cast:
+                        try:
+                            value = cast(value)
+                        except ValueError:
+                            pass
+                    setattr(new, key, value)
                 new.save()
                 print(new.id)
 
