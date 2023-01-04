@@ -39,6 +39,10 @@ class HBNBCommand(cmd.Cmd):
         dic = {}
         for ele in tmp:
             key_val = ele.split('=')
+            if ' ' in key_val[1]:
+                key_val[1] = key_val[1].replace(' ', '_')
+            elif '"' in key_val[1]:
+                key_val[1] = key_val[1].replace('"', '')
             dic[key_val[0]] = key_val[1]
         if len(arg) == 0:
             print("** class name missing **")
