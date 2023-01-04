@@ -1,34 +1,48 @@
 #!/usr/bin/python3
-"""The interactive console for Admimistrative use"""
+""" Test delete feature
+"""
+from models.engine.file_storage import FileStorage
+from models.state import State
 
+fs = FileStorage()
 
-import cmd
+# All States
+all_states = fs.all(State)
+print("All States: {}".format(len(all_states.keys())))
+for state_key in all_states.keys():
+    print(all_states[state_key])
 
+# Create a new State
+new_state = State()
+new_state.name = "California"
+fs.new(new_state)
+fs.save()
+print("New State: {}".format(new_state))
 
-class HBNBCommand(cmd.Cmd):
-    """A Console class that inherits from cmd"""
-    prompt = '(hbnb) '
-    class_names = ['BaseModel', 'User', 'State', 'City', 'Place', 'Amenity', 'Review']
+# All States
+all_states = fs.all(State)
+print("All States: {}".format(len(all_states.keys())))
+for state_key in all_states.keys():
+    print(all_states[state_key])
 
-    def do_EOF(self, line):
-        """EOF command to exit the program"""
-        return True
+# Create another State
+another_state = State(State)
+another_state.name = "Nevada"
+fs.new(another_state)
+fs.save()
+print("Another State: {}".format(another_state))
 
-    def do_quit(self, line):
-        """Quit command to exit the program"""
-        print('')
-        return True
+# All States
+all_states = fs.all()
+print("All States: {}".format(len(all_states.keys())))
+for state_key in all_states.keys():
+    print(all_states[state_key])        
 
-    def emptyline(self):
-        pass
+# Delete the new State
+fs.delete(new_state)
 
-    def do_create(self, args):
-        """Create a new instance of BaseModel, saves it
-        (to the JSON file)and prints the id"""
-        arg = args.split()
-        print(arg)
-        for i in arg:
-            print(i.split("="))
-
-if __name__ == '__main__':
-    HBNBCommand().cmdloop()
+# All States
+all_states = fs.all(State)
+print("All States: {}".format(len(all_states.keys())))
+for state_key in all_states.keys():
+    print(all_states[state_key])

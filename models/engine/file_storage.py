@@ -17,9 +17,14 @@ class FileStorage:
     __file_path = 'file.json'
     __objects = {}
 
-    def all(self):
-        """Returns the dict objects"""
-        return (FileStorage.__objects)
+    def all(self, cls=None):
+        """Returns the dict objects with an optional filtering"""
+        if not cls:
+            return (FileStorage.__objects)
+        else:
+            new = {k: v for k, v in FileStorage.__objects.items()
+                   if isinstance(v, cls)}
+            return (new)
 
     def new(self, obj):
         """sets an instance to the object attr"""
@@ -44,3 +49,15 @@ class FileStorage:
                     self.new(eval('{}({})'.format(cls, '**obj_dict')))
         else:
             return
+
+    def delete(self, obj=None):
+        """A method that deletes obj from obj if it exists"""
+        if not obj:
+            pass
+        else:
+            for key, val in FileStorage.__objects.items():
+                if obj == val:
+                    del FileStorage.__objects[key]
+                    return
+                else:
+                    pass
