@@ -29,10 +29,6 @@ class HBNBCommand(cmd.Cmd):
         print(arg)
         for i in arg:
             print(i.split("="))
-#        for key, in arg:
- #           print(key.spilt())
-
-
 
 if __name__ == '__main__':
     HBNBCommand().cmdloop()
