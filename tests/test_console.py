@@ -83,11 +83,12 @@ class TestConsole(unittest.TestCase):
             self.assertEqual(
                 "** class doesn't exist **\n", f.getvalue())
         with patch('sys.stdout', new=StringIO()) as f:
-            self.consol.onecmd('create User email="hoal@.com" password="1234"')
+            self.consol.onecmd("create User email='person@personmail.com' "
+                               "password='person'")
         with patch('sys.stdout', new=StringIO()) as f:
             self.consol.onecmd("all User")
-            # self.assertEqual(
-            #     "[[User]", f.getvalue()[:7])
+            self.assertEqual(
+                "[[User]", f.getvalue()[:7])
 
     def test_show(self):
         """Test show command inpout"""
@@ -104,7 +105,7 @@ class TestConsole(unittest.TestCase):
             self.assertEqual(
                 "** instance id missing **\n", f.getvalue())
         with patch('sys.stdout', new=StringIO()) as f:
-            self.consol.onecmd("show BaseModel abcd-123")
+            self.consol.onecmd("show State abcd-123")
             self.assertEqual(
                 "** no instance found **\n", f.getvalue())
 
@@ -194,7 +195,7 @@ class TestConsole(unittest.TestCase):
             self.assertEqual(
                 "** class doesn't exist **\n", f.getvalue())
         with patch('sys.stdout', new=StringIO()) as f:
-            self.consol.onecmd("BaseModel.show(abcd-123)")
+            self.consol.onecmd("State.show(abcd-123)")
             self.assertEqual(
                 "** no instance found **\n", f.getvalue())
 
@@ -232,6 +233,22 @@ class TestConsole(unittest.TestCase):
             self.assertEqual(
                 "** value missing **\n", f.getvalue())
 
+    def test_zz_create(self):
+        """Test expanded console functionality
+        """
+        with patch('sys.stdout', new=StringIO()) as f:
+            self.consol.onecmd('create User first_name="Ger_trude" '
+                               'invalid_param=unvalid '
+                               'last_name=s71ll_n07_va11d '
+                               'email="person@personmail.com" '
+                               'password="person"')
+            user_id = f.getvalue()
+        with patch('sys.stdout', new=StringIO()) as f:
+            self.consol.onecmd("show User " + user_id)
+            out = f.getvalue()
+            self.assertTrue("Ger trude" in out)
+            self.assertFalse("unvalid" in out)
+            self.assertFalse("s71ll_n07_va11d" in out)
 
 if __name__ == "__main__":
     unittest.main()
