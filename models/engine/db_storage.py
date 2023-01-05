@@ -2,9 +2,11 @@
 """A database storage engine"""
 
 
+import datetime
 import os
-from sqlalchemy.orm import session_maker
+from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy import create_engine
+from models.base_model import BaseModel, Base
 from models.user import User
 from models.state import State
 from models.city import City
@@ -26,22 +28,28 @@ class DBStorage:
 
     def __init__(self):
         """a method that creates engine"""
-        self.engine = create_engine("mysql+mysqldb://{}:{}@{}/{}".format(hbnb_dev, hbnb_dev_host, hbnb_dev_passwd, hbnb_dev_db), pool_pre_ping=True)
+        self.engine = create_engine("mysql+mysqldb://{}:{}@{}/{}".format(hbnb_dev, hbnb_dev_passwd, hbnb_dev_host, hbnb_dev_db), pool_pre_ping=True)
         if hbnb_env == 'test':
             Base.metadata.drop_all(self.__engine)
 
     def all(self, cls=None):
-        """Query that finds objects and print"""
-        Session = sessionmaker(bind=engine)
-        self.__session = Session()
+        """Returns dictionary with all objects depending
+        of the class name (argument cls)"""
         if cls:
-            result = self.__session.query(cls).all()
-            res = {f"{cls}.{val.id}": val for val in result}
+            objs = self.__session.query(self.classes()[cls])
         else:
-            result = self.__session.query(User, State, City, Amenity, Place, Review).all()
-            res = {f"{cls}.{val.id}": val for val in result}
+            objs = self.__session.query(State).all()
+            objs += self.__session.query(City).all()
+            objs += self.__session.query(User).all()
+            objs += self.__session.query(Place).all()
+            objs += self.__session.query(Amenity).all()
+            objs += self.__session.query(Review).all()
 
-        return (res)
+        dic = {}
+        for obj in objs:
+            k = '{}.{}'.format(type(obj).__name__, obj.id)
+            dic[k] = obj
+        return dic
 
     def new(self, obj):
         """Add the object to the current database session"""

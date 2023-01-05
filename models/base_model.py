@@ -14,7 +14,7 @@ from sqlalchemy import Column, Integer, String, DateTime
 Base = declarative_base()
 class BaseModel:
     """A Base class"""
-    id = Column(String(60), primary_key=True, nullable=False, unique=True)
+    id = Column(String(60), primary_key=True, nullable=False)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow())
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow())
 
@@ -22,15 +22,15 @@ class BaseModel:
         """initialization of object"""
         if kwargs and kwargs is not None:
             for key, value in kwargs.items():
-                if key == '__class__':
-                    pass
+                if key != '__class__':
+                    setattr(self, key, value)
                 elif (key == 'created_at'):
                     self.created_at = datetime.\
                             strptime(kwargs[key], '%Y-%m-%dT%H:%M:%S.%f')
+                    setattr(self, key, value)
                 elif (key == 'updated_at'):
                     self.updated_at = datetime.\
                             strptime(kwargs[key], '%Y-%m-%dT%H:%M:%S.%f')
-                else:
                     setattr(self, key, value)
         else:
             self.id = str(uuid.uuid4())
