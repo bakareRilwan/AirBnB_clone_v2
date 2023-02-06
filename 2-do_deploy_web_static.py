@@ -1,64 +1,40 @@
 #!/usr/bin/python3
-"""Generates a .tgz archive from the
-contents of the web_static folder
-Distributes an archive to a web server"""
-
-from fabric.operations import local, run, put
+""" Function that compress a folder """
 from datetime import datetime
+from fabric.api import *
+import shlex
 import os
-from fabric.api import env
-import re
 
 
-env.hosts = ['35.153.51.178', '54.152.34.136']
-
-
-def do_pack():
-    """Function to compress files in an archive"""
-    local("mkdir -p versions")
-    result = local("tar -cvzf versions/web_static_{}.tgz web_static"
-                   .format(datetime.strftime(datetime.now(), "%Y%m%d%H%M%S")),
-                   capture=True)
-    if result.failed:
-        return None
-    return result
+env.hosts = ['44.211.97.124', '34.228.52.136']
+env.user = "ubuntu"
 
 
 def do_deploy(archive_path):
-    """Function to distribute an archive to a server"""
+    """ Deploys """
     if not os.path.exists(archive_path):
         return False
-    rex = r'^versions/(\S+).tgz'
-    match = re.search(rex, archive_path)
-    filename = match.group(1)
-    res = put(archive_path, "/tmp/{}.tgz".format(filename))
-    if res.failed:
+    try:
+        name = archive_path.replace('/', ' ')
+        name = shlex.split(name)
+        name = name[-1]
+
+        wname = name.replace('.', ' ')
+        wname = shlex.split(wname)
+        wname = wname[0]
+
+        releases_path = "/data/web_static/releases/{}/".format(wname)
+        tmp_path = "/tmp/{}".format(name)
+
+        put(archive_path, "/tmp/")
+        run("mkdir -p {}".format(releases_path))
+        run("tar -xzf {} -C {}".format(tmp_path, releases_path))
+        run("rm {}".format(tmp_path))
+        run("mv {}web_static/* {}".format(releases_path, releases_path))
+        run("rm -rf {}web_static".format(releases_path))
+        run("rm -rf /data/web_static/current")
+        run("ln -s {} /data/web_static/current".format(releases_path))
+        print("New version deployed!")
+        return True
+    except:
         return False
-    res = run("mkdir -p /data/web_static/releases/{}/".format(filename))
-    if res.failed:
-        return False
-    res = run("tar -xzf /tmp/{}.tgz -C /data/web_static/releases/{}/"
-              .format(filename, filename))
-    if res.failed:
-        return False
-    res = run("rm /tmp/{}.tgz".format(filename))
-    if res.failed:
-        return False
-    res = run("mv /data/web_static/releases/{}"
-              "/web_static/* /data/web_static/releases/{}/"
-              .format(filename, filename))
-    if res.failed:
-        return False
-    res = run("rm -rf /data/web_static/releases/{}/web_static"
-              .format(filename))
-    if res.failed:
-        return False
-    res = run("rm -rf /data/web_static/current")
-    if res.failed:
-        return False
-    res = run("ln -s /data/web_static/releases/{}/ /data/web_static/current"
-              .format(filename))
-    if res.failed:
-        return False
-    print('New version deployed!')
-    return True
